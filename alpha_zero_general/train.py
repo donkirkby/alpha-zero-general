@@ -1,6 +1,6 @@
 import os
-from importlib import import_module
 
+from alpha_zero_general.utils import imported_argument
 from .Coach import Coach
 
 
@@ -9,11 +9,13 @@ def config_parser(parser):
     parser.add_argument(
         'game',
         nargs='?',
+        type=imported_argument,
         default='alpha_zero_general.othello.OthelloGame.OthelloGame',
         help='game class with rules')
     parser.add_argument(
         'network',
         nargs='?',
+        type=imported_argument,
         default='alpha_zero_general.othello.pytorch.NNet.NNetWrapper',
         help='neural network class to train')
     parser.add_argument(
@@ -70,16 +72,9 @@ def config_parser(parser):
         help='number of episodes to keep training data from')
 
 
-def import_class(full_class_name):
-    module_name, class_name = full_class_name.rsplit('.', 1)
-    return getattr(import_module(module_name), class_name)
-
-
 def train(args):
-    game_class = import_class(args.game)
-    nnet_class = import_class(args.network)
-    g = game_class()
-    nnet = nnet_class(g)
+    g = args.game()
+    nnet = args.network(g)
 
     if args.load_model:
         nnet.load_checkpoint(os.path.dirname(args.load_model),

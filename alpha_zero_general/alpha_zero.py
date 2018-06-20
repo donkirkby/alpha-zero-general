@@ -1,6 +1,6 @@
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
-from alpha_zero_general.pit import pit
+from alpha_zero_general import pit
 from alpha_zero_general import train
 
 
@@ -15,11 +15,10 @@ def parse_args():
         help='Train a model',
         description='Train a model by alternating self play and learning.'))
 
-    pit_parser = subparsers.add_parser(
+    pit.config_parser(subparsers.add_parser(
         'pit',
         help='Pit two players against each other',
-        description='Pit two players against each other in two games.')
-    pit_parser.set_defaults(handler=pit)
+        description='Pit two players against each other in two games.'))
 
     return parser.parse_args()
 
