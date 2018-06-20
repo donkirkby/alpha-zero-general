@@ -5,7 +5,7 @@ import sys
 sys.path.append('../../')
 from alpha_zero_general.utils import *
 from pytorch_classification.utils import Bar, AverageMeter
-from NeuralNet import NeuralNet
+from alpha_zero_general.NeuralNet import NeuralNet
 
 import tensorflow as tf
 from .OthelloNNet import OthelloNNet as onnet

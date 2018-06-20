@@ -4,7 +4,7 @@ import numpy as np
 import sys
 sys.path.append('..')
 from alpha_zero_general.utils import *
-from NeuralNet import NeuralNet
+from alpha_zero_general.NeuralNet import NeuralNet
 
 from .OthelloNNet import OthelloNNet as onnet
 
