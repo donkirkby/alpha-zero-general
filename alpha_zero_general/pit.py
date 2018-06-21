@@ -72,17 +72,16 @@ def config_parser(parser):
     parser.add_argument(
         '--cpuct2',
         type=float,
-        default=1.0,
         help='a hyperparameter that controls the degree of exploration '
-             'for player 2')
+             'for player 2, if different')
     parser.add_argument(
         '--load_model1',
         default='./temp/best.pth.tar',
         help='checkpoint file to load neural network model from for player 1')
     parser.add_argument(
         '--load_model2',
-        default='./temp/best.pth.tar',
-        help='checkpoint file to load neural network model from for player 2')
+        help='checkpoint file to load neural network model from for player 2, '
+             'if different')
 
 
 def split_args(args):

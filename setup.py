@@ -11,4 +11,5 @@ setup(name='alpha_zero_general',
                 'alpha_zero_general/gobang',
                 'alpha_zero_general/othello',
                 'alpha_zero_general/tictactoe'],
+      install_requires=['numpy'],
       scripts=['alpha_zero_general/alpha_zero.py'])

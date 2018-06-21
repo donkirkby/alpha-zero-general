@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 from alpha_zero_general import pit
@@ -18,7 +20,8 @@ def parse_args():
     pit.config_parser(subparsers.add_parser(
         'pit',
         help='Pit two players against each other',
-        description='Pit two players against each other in two games.'))
+        description='Pit two players against each other in two games.',
+        formatter_class=ArgumentDefaultsHelpFormatter))
 
     return parser.parse_args()
 
