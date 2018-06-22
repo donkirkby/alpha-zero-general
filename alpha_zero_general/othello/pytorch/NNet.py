@@ -1,10 +1,9 @@
 import os
 import time
 import numpy as np
-import sys
-sys.path.append('../../')
-from alpha_zero_general.utils import *
-from pytorch_classification.utils import Bar, AverageMeter
+from progress.bar import Bar
+from ...utils import dotdict
+from ...pytorch_classification.utils import AverageMeter
 from alpha_zero_general.NeuralNet import NeuralNet
 
 import torch

@@ -108,7 +108,7 @@ def split_args(args):
 
 def create_player(args, game):
     if args.player is not None:
-        return args.player(game)
+        return args.player(game).play
 
     # MCTS players
     network = args.network(game)
