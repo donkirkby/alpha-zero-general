@@ -1,4 +1,6 @@
-from pytorch_classification.utils import Bar, AverageMeter
+from progress.bar import Bar
+
+from .pytorch_classification.utils import AverageMeter
 import time
 
 class Arena():

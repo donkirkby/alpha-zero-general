@@ -2,10 +2,12 @@ from collections import deque
 from alpha_zero_general.Arena import Arena
 from alpha_zero_general.MCTS import MCTS
 import numpy as np
-from pytorch_classification.utils import Bar, AverageMeter
+from .pytorch_classification.utils import AverageMeter
 import time, os, sys
 from pickle import Pickler, Unpickler
 from random import shuffle
+
+from progress.bar import Bar
 
 
 class Coach():

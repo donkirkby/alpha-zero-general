@@ -1,5 +1,4 @@
 import os
-
 from alpha_zero_general.utils import imported_argument
 from .Coach import Coach
 

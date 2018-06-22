@@ -1,10 +1,9 @@
 import os
 import time
 import numpy as np
-import sys
-sys.path.append('../../')
+from progress.bar import Bar
 from alpha_zero_general.utils import *
-from pytorch_classification.utils import Bar, AverageMeter
+from ...pytorch_classification.utils import AverageMeter
 from alpha_zero_general.NeuralNet import NeuralNet
 
 import tensorflow as tf
@@ -116,8 +115,6 @@ class NNetWrapper(NeuralNet):
 
     def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         filepath = os.path.join(folder, filename)
-        if not os.path.exists(filepath + '.meta'):
-            raise("No model in path {}".format(filepath))
         with self.nnet.graph.as_default():
             self.saver = tf.train.Saver()
             self.saver.restore(self.sess, filepath)
