@@ -8,7 +8,7 @@ from subprocess import Popen, PIPE
 
 import sys
 
-from alpha_zero_general.utils import imported_argument
+from alpha_zero_general.utils import imported_argument, dotdict
 
 
 class RemoteException(Exception):
@@ -32,14 +32,15 @@ class RemotePlayerServer:
                 response = method(**request)
                 print(dumps(response), file=self.out_file)
             except Exception as ex:
+                print_exc()
                 message = "".join(format_exception_only(ex.__class__, ex)).strip()
                 print(dumps(dict(error=message)), file=self.out_file)
 
-    def start(self, game, player):
+    def start(self, game, player, **kwargs):
         game_class = imported_argument(game)
         self.game = game_class()
         player_class = imported_argument(player)
-        self.player = player_class(self.game)
+        self.player = player_class(self.game, dotdict(kwargs))
         return {}
 
     def move(self, board):
