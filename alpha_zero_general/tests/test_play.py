@@ -2,7 +2,9 @@ from argparse import Namespace
 from io import StringIO
 from pathlib import Path
 
-from alpha_zero_general.play import RemotePlayerServer, RemotePlayerClient
+import pytest
+
+from alpha_zero_general.play import RemotePlayerServer, RemotePlayerClient, RemoteException
 from alpha_zero_general.tictactoe.TicTacToeGame import TicTacToeGame
 
 
@@ -74,3 +76,13 @@ def test_client():
     action = client.play(board)
 
     assert expected_action == action
+
+
+def test_client_error():
+    remote_path = Path(__file__).parent.parent.parent
+    args = Namespace(
+        game="alpha_zero_general.tictactoe.TicTacToeGame.BogusGame",
+        player="alpha_zero_general.tictactoe.TicTacToePlayers.FirstChoicePlayer",
+        remote_path=remote_path)
+    with pytest.raises(RemoteException, match='attribute BogusGame not found'):
+        RemotePlayerClient(args)

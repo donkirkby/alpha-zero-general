@@ -1,7 +1,7 @@
 """ Run a player, receiving game states on stdin and sending moves on stdout. """
 from json import dumps, loads
 from sys import stdin, stdout
-from traceback import format_exception_only
+from traceback import format_exception_only, print_exc
 
 import numpy as np
 from subprocess import Popen, PIPE
@@ -9,6 +9,11 @@ from subprocess import Popen, PIPE
 import sys
 
 from alpha_zero_general.utils import imported_argument
+
+
+class RemoteException(Exception):
+    """ Raised by the client when an error is returned by the server. """
+    pass
 
 
 class RemotePlayerServer:
@@ -48,6 +53,8 @@ class RemotePlayerClient:
         command = dict(args.__dict__)
         command['command'] = 'start'
         remote_path = command.pop('remote_path')
+        command.pop('display', None)
+        command.pop('handler', None)
         self.process = Popen([sys.executable, '-m', 'alpha_zero_general.play'],
                              stdin=PIPE,
                              stdout=PIPE,
@@ -63,8 +70,15 @@ class RemotePlayerClient:
         text = dumps(request) + '\n'
         self.process.stdin.write(text.encode())
         self.process.stdin.flush()
-        response = self.process.stdout.readline()
-        return loads(response)
+        response_text = self.process.stdout.readline()
+        response = loads(response_text)
+        error = response.get('error')
+        if error:
+            self.process.stdin.close()
+            self.process.wait()
+            self.process = None
+            raise RemoteException(error)
+        return response
 
 
 def main():
