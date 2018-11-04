@@ -1,6 +1,8 @@
 import os
 from argparse import Namespace
+from pathlib import Path
 
+from alpha_zero_general.play import RemotePlayerClient
 from . import Arena
 from .MCTS import MCTS
 
@@ -8,7 +10,7 @@ import numpy as np
 from alpha_zero_general.utils import imported_argument
 
 """
-use this script to play any two agents against each other, or play manually with
+Use this script to play any two agents against each other, or play manually with
 any agent.
 """
 
@@ -18,7 +20,6 @@ def config_parser(parser):
     parser.add_argument(
         'game',
         nargs='?',
-        type=imported_argument,
         default='alpha_zero_general.othello.OthelloGame.OthelloGame',
         help='game class with rules')
     parser.add_argument(
@@ -36,52 +37,42 @@ def config_parser(parser):
         action='store_true',
         help='turns off game display')
     parser.add_argument(
-        '--player1',
-        type=imported_argument,
-        help='class to choose moves for player 1, if not MCTS')
-    parser.add_argument(
-        '--player2',
-        type=imported_argument,
-        help='class to choose moves for player 2, if not MCTS')
-    parser.add_argument(
-        '--network1',
-        type=imported_argument,
-        default='alpha_zero_general.othello.pytorch.NNet.NNetWrapper',
-        help='neural network class to use for player 1 if it is MCTS')
-    parser.add_argument(
-        '--network2',
-        type=imported_argument,
-        help='neural network class to use for player 2, if different')
-    parser.add_argument(
-        '--num_mcts_sims1',
+        '--remote_path',
+        type=Path,
+        help='Path to another copy of the project to run player 2.')
+    group = parser.add_argument_group(
+        'players',
+        'These options can accept one or two values. Use one value if it should '
+        'be used by both players.')
+    group.add_argument(
+        '--players',
+        nargs='*',
+        default=['alpha_zero_general.pit.MCTSPlayer'],
+        help='classes to choose moves for player 1 and 2')
+    group.add_argument(
+        '--networks',
+        nargs='*',
+        default=['alpha_zero_general.othello.pytorch.NNet.NNetWrapper'],
+        help='neural network classes to use for player 1 and 2 if they are MCTS')
+    group.add_argument(
+        '--num_mcts_sims',
+        nargs='*',
         type=int,
-        default=25,
+        default=[25],
         help='number of Monte Carlo Tree Search simulations before each move '
-             'for player 1 if it is MCTS')
-    parser.add_argument(
-        '--num_mcts_sims2',
-        type=int,
-        help='number of Monte Carlo Tree Search simulations before each move '
-             'for player 2, if different')
-    parser.add_argument(
-        '--cpuct1',
+             'for player 1 and 2 if they are MCTS')
+    group.add_argument(
+        '--cpucts',
+        nargs='*',
         type=float,
-        default=1.0,
+        default=[1.0],
         help='a hyperparameter that controls the degree of exploration '
-             'for player 1')
-    parser.add_argument(
-        '--cpuct2',
-        type=float,
-        help='a hyperparameter that controls the degree of exploration '
-             'for player 2, if different')
-    parser.add_argument(
-        '--load_model1',
-        default='./temp/best.pth.tar',
+             'for player 1 and 2')
+    group.add_argument(
+        '--load_models',
+        nargs='*',
+        default=['./temp/best.pth.tar'],
         help='checkpoint file to load neural network model from for player 1')
-    parser.add_argument(
-        '--load_model2',
-        help='checkpoint file to load neural network model from for player 2, '
-             'if different')
 
 
 def split_args(args):
@@ -89,43 +80,41 @@ def split_args(args):
     for name, value in args.__dict__.items():
         if name.startswith('_'):
             continue
-        if name is 'player1':
-            args1.player = value
-        elif name is 'player2':
-            args2.player = value
-        elif name.endswith('1'):
-            base_name = name[:-1]
-            value2 = getattr(args, base_name+'2', value)
-            if value2 is None:
-                value2 = value
-            setattr(args1, base_name, value)
-            setattr(args2, base_name, value2)
-        elif not name.endswith('2'):
-            setattr(args1, name, value)
-            setattr(args2, name, value)
+        if not name.endswith('s'):
+            target_name = name
+            value1 = value2 = value
+        else:
+            target_name = name[:-1] if name != 'num_mcts_sims' else name
+            if len(value) == 1:
+                value1 = value2 = value[0]
+            else:
+                value1, value2 = value
+        setattr(args1, target_name, value1)
+        setattr(args2, target_name, value2)
     return args1, args2
 
 
-def create_player(args, game):
-    if args.player is not None:
-        return args.player(game).play
+class MCTSPlayer:
+    def __init__(self, game, args):
+        self.game = game
+        network = imported_argument(args.network)(game)
+        folder, filename = os.path.split(args.load_model)
+        network.load_checkpoint(folder, filename)
+        self.mcts = MCTS(game, network, args)
 
-    # MCTS players
-    network = args.network(game)
-    folder, filename = os.path.split(args.load_model)
-    network.load_checkpoint(folder, filename)
-    mcts = MCTS(game, network, args)
-    return lambda x: np.argmax(mcts.getActionProb(x, temp=0))
+    def play(self, board):
+        return np.argmax(self.mcts.getActionProb(board, temp=0))
 
 
 def pit(args):
     args1, args2 = split_args(args)
-    g = args.game()
+    g = imported_argument(args.game)()
 
-    # noinspection PyTypeChecker
-    player1 = create_player(args1, g)
-    # noinspection PyTypeChecker
-    player2 = create_player(args2, g)
+    player1 = imported_argument(args1.player)(g, args1).play
+    if args.remote_path is None:
+        player2 = imported_argument(args2.player)(g, args2).play
+    else:
+        player2 = RemotePlayerClient(args2).play
 
     arena = Arena.Arena(player1, player2, g, display=args.display)
     print(arena.playGames(args.game_count, verbose=not args.quiet))

@@ -1,5 +1,7 @@
 from __future__ import print_function
 import sys
+from io import StringIO
+
 sys.path.append('..')
 from alpha_zero_general.Game import Game
 from .TicTacToeLogic import Board
@@ -14,9 +16,22 @@ Date: Jan 5, 2018.
 
 Based on the OthelloGame by Surag Nair.
 """
+
+
 class TicTacToeGame(Game):
     def __init__(self, n=3):
+        super().__init__()
         self.n = n
+
+    def parse_board(self, text):
+        piece_players = {'O': 1, 'X': -1, '-': 0}
+        board = self.getInitBoard()
+        for i, line in enumerate(text.splitlines()):
+            for j in range(self.n):
+                c = line[j*2]
+                player = piece_players[c]
+                board[i][j] = player
+        return board
 
     def getInitBoard(self):
         # return initial board (numpy board)
@@ -94,31 +109,37 @@ class TicTacToeGame(Game):
         # 8x8 numpy array (canonical board)
         return board.tostring()
 
-def display(board):
+    def display(self, board):
+        buffer = StringIO()
+        display(board, buffer)
+        return buffer.getvalue()
+
+
+def display(board, file=None):
     n = board.shape[0]
 
-    print("   ", end="")
+    print("  ", end="", file=file)
     for y in range(n):
-        print (y,"", end="")
-    print("")
-    print("  ", end="")
+        print("", y, end="", file=file)
+    print("", file=file)
+    print("  ", end="", file=file)
     for _ in range(n):
-        print ("-", end="-")
-    print("--")
+        print ("-", end="-", file=file)
+    print("--", file=file)
     for y in range(n):
-        print(y, "|",end="")    # print the row #
+        print(y, "|", end="", file=file)    # print the row #
         for x in range(n):
             piece = board[y][x]    # get the piece to print
-            if piece == -1: print("X ",end="")
-            elif piece == 1: print("O ",end="")
+            if piece == -1: print("X ", end="", file=file)
+            elif piece == 1: print("O ", end="", file=file)
             else:
                 if x==n:
-                    print("-",end="")
+                    print("-", end="", file=file)
                 else:
-                    print("- ",end="")
-        print("|")
+                    print("- ", end="", file=file)
+        print("|", file=file)
 
-    print("  ", end="")
+    print("  ", end="", file=file)
     for _ in range(n):
-        print ("-", end="-")
-    print("--")
+        print ("-", end="-", file=file)
+    print("--", file=file)

@@ -14,7 +14,7 @@ class RandomPlayer():
 
 
 class HumanConnect4Player():
-    def __init__(self, game):
+    def __init__(self, game, _args):
         self.game = game
 
     def play(self, board):

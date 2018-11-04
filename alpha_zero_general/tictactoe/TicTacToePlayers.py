@@ -9,7 +9,9 @@ Date: Jan 5, 2018.
 Based on the OthelloPlayers by Surag Nair.
 
 """
-class RandomPlayer():
+
+
+class RandomPlayer:
     def __init__(self, game):
         self.game = game
 
@@ -45,3 +47,13 @@ class HumanTicTacToePlayer():
                 print('Invalid')
 
         return a
+
+
+class FirstChoicePlayer:
+    def __init__(self, game):
+        self.game = game
+
+    def play(self, board):
+        valid_moves = self.game.getValidMoves(board, player=None)
+        valid_indexes = np.nonzero(valid_moves)[0]
+        return valid_indexes[0]

@@ -1,6 +1,7 @@
 import os
 import time
 import numpy as np
+import sys
 from progress.bar import Bar
 from alpha_zero_general.utils import *
 from ...pytorch_classification.utils import AverageMeter
@@ -38,7 +39,7 @@ class NNetWrapper(NeuralNet):
         """
 
         for epoch in range(args.epochs):
-            print('EPOCH ::: ' + str(epoch + 1))
+            print('EPOCH ::: ' + str(epoch + 1), file=sys.stderr)
             data_time = AverageMeter()
             batch_time = AverageMeter()
             pi_losses = AverageMeter()
